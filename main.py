@@ -1,6 +1,8 @@
 # 这是一个train_loader=Noneort pandas as pd
 import pandas as pd
 import torch
+from sklearn.preprocessing import StandardScaler
+
 from LSTM import LSTM_module
 import matplotlib.pyplot as plt
 import torch
@@ -23,14 +25,19 @@ def read_Data():
     datas_i_80_c_2224 = datas_i_80_c[datas_i_80_c.Vehicle_ID == 2224]
     print('正在导出数据')
     datas_i_80_c_2224.sort_values(by='Global_Time', inplace=True)
-    datas_i_80_c_2224.to_csv('小型车2224数据.csv')
+    datas_i_80_c_2224.to_csv('小型车2224数据_xy.csv')
     print('i-80路段，小型车数据已导出完毕')
 
 def Data_prograss(model, criterion, optimizer):
     # 清理数据
     car1 = pd.read_csv('小型车2224数据.csv')
-    car1.plot()
-    features = car1[['Vehicle_ID', 'Global_Time', 'Global_X', 'Global_Y', 'v_Class', 'v_Vel', 'v_Acc']].values  # 车辆的7个特征
+    # 2.实例化一个转换器
+    transfer = StandardScaler()
+    # 3.调用transform转换
+    car_new = transfer.fit_transform(car1)
+    print(car_new)
+    # features = car1[['Vehicle_ID', 'Global_Time', 'Global_X', 'Global_Y', 'v_Class', 'v_Vel', 'v_Acc']].values  # 车辆的7个特征
+    features = car1[['Global_X', 'Global_Y']].values  # 车辆的7个特征
     label = car1[['Global_X', 'Global_Y']].values
     # 创建序列
     N = 100
@@ -75,6 +82,7 @@ def Data_prograss(model, criterion, optimizer):
     print(f'Average Test Loss: {average_test_loss:.4f}')
 def Init():
     input_dim = 7  # Vehicle_ID', 'Global_Time', 'Global_X', 'Global_Y', 'v_Class', 'v_Vel', 'v_Acc
+    input_dim = 2  # global_x global_y
     hidden_dim = 50  # 隐藏层
     num_layers = 3  # 训练层数
     output_dim = 2  # X, Y
